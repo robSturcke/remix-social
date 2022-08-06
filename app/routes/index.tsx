@@ -1,28 +1,31 @@
 import type { LoaderFunction } from '@remix-run/node';
+import { json } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
+import type { Post } from '~/services/posts.server';
+import { getPosts } from '~/services/posts.server';
+import { Post as PostBlob } from '~/components/Post';
 
-export const loader: LoaderFunction = () => {
-  return [{ title: 'first', body: 'My first post' }];
+type LoaderData = {
+  posts: Post[];
 };
 
-type Post = {
-  title: string;
-  body: string;
+export const loader: LoaderFunction = async () => {
+  const data: LoaderData = { posts: await getPosts() };
+  return json(data);
 };
 
 export default function Index() {
-  const posts = useLoaderData<Post[]>();
+  const { posts } = useLoaderData<LoaderData>();
 
   return (
-    <div style={{ fontFamily: 'system-ui, sans-serif', lineHeight: '1.4' }}>
-      <h1>Welcome to Remix</h1>
+    <div className="container">
+      <h1 className="text-3xl font-bold underline text-red-500">
+        Welcome to Remix Social
+      </h1>
       <ul>
         {posts.map((post) => (
-          <li key={post.title}>
-            <div>
-              <h2>{post.title}</h2>
-              <p>{post.body}</p>
-            </div>
+          <li key={post.id}>
+            <PostBlob header={post.title}>{post.body}</PostBlob>
           </li>
         ))}
       </ul>
